@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { BehaviorSubject, lastValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -8,6 +9,10 @@ import { Router } from '@angular/router';
 export class LoginServiceService {
   private _userName = ''; //keep as private variable
   private _password = '';
+
+  // isUserLoggedIn:boolean = false;
+  isUserLoggedIn: BehaviorSubject<boolean> = new BehaviorSubject(false);
+
 
   constructor(private http: HttpClient, private router: Router) { }
 
@@ -44,6 +49,7 @@ export class LoginServiceService {
         localStorage.setItem('refresh_token', data.refresh_token);
 
         //redirect user to home page
+        this.isUserLoggedIn.next(true);
         this.router.navigate(['home']);
 
         console.log('recieved response')
@@ -51,21 +57,25 @@ export class LoginServiceService {
 
   }
 
-  isLoggedIn(){
+  async isLoggedIn(){
     let url = "https://api.escuelajs.co/api/v1/auth/profile";
     let accesToken = localStorage.getItem('access_token');
-    console.log(accesToken);
-    let headers = { 'Authorization': `Bearer ${accesToken}`}
-    this.http.get<any>(url, { headers }).subscribe({
-      next: data => {
-          console.log("user validated")
-      },
-      error: error => {
-          //logut an user if the token is not valid or any error redirect to login page
-          //clear local storage
-          localStorage.clear();
-          this.router.navigate(['login']);
-      }
-  })
+
+    if(accesToken === null || accesToken == ''){
+      console.log("1")
+      this.isUserLoggedIn.next(false);
+      return;
+    }else{
+      // validate token
+      let headers = { 'Authorization': `Bearer ${accesToken}`}
+      await lastValueFrom(this.http.get<any>(url, { headers })).catch(err=>{
+        console.log("2")
+        this.isUserLoggedIn.next(false);
+        return;
+      })
+    }
+    //valid user login
+    console.log("3")
+    this.isUserLoggedIn.next(true);
   }
 }

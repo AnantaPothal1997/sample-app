@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { lastValueFrom } from 'rxjs';
 import { LoginServiceService } from 'src/app/services/login-service.service';
 
 @Component({
@@ -10,10 +11,9 @@ export class HomeComponent{
   constructor(private loginService:LoginServiceService){
 
   }
-
   checkLogin(){
-    this.loginService.isLoggedIn();
+   console.log("user status"+this.loginService.isUserLoggedIn)
 
   }
 
-}
+ }
