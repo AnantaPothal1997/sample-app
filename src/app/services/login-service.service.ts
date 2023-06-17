@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, lastValueFrom } from 'rxjs';
+import { BehaviorSubject, catchError, lastValueFrom, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -17,17 +17,17 @@ export class LoginServiceService {
   constructor(private http: HttpClient, private router: Router) { }
 
   //use getter and setter to set the value
-  public get userName():string{
+  public get userName():any{
     return this._userName;
   }
-  set userName(val: string){
+  set userName(val: any){
     this._userName = val;
   }
 
-  public get password():string{
+  public get password():any{
     return this._password;
   }
-  set password(val: string){
+  set password(val: any){
     this._password = val;
   }
 
@@ -42,20 +42,16 @@ export class LoginServiceService {
         "email": this.userName,
         "password": this.password
     }
-    this.http.post<any>(url, requestData).subscribe(data => {
-        // console.log(data);
-
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('refresh_token', data.refresh_token);
-
-        //redirect user to home page
-        this.isUserLoggedIn.next(true);
-        this.router.navigate(['home']);
-
-        console.log('recieved response')
-    })
+    return this.http.post<any>(url, requestData);
 
   }
+
+  private handleError(error: HttpErrorResponse) {
+    console.log('control here')
+    return throwError(() => new Error('Something bad happened; please try again'));
+  }
+
+
 
   async isLoggedIn(){
     let url = "https://api.escuelajs.co/api/v1/auth/profile";
@@ -77,5 +73,12 @@ export class LoginServiceService {
     //valid user login
     console.log("3")
     this.isUserLoggedIn.next(true);
+  }
+
+  logoutProcess(){
+    console.log("logitre")
+    localStorage.clear();
+    this.router.navigate(['login'])
+    this.isUserLoggedIn.next(false);
   }
 }

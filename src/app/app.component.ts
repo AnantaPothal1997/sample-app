@@ -17,7 +17,8 @@ export class AppComponent implements OnInit{
    await this.loginService.isLoggedIn();
    this.loginService.isUserLoggedIn.subscribe(data=>{
     console.log("recieve data:"+data);
-    this.showHeaderFooter = true;
+      localStorage.setItem('userLoginStatus', data ?"1":"0");
+      this.showHeaderFooter = data;
    });
   }
 

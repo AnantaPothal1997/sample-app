@@ -1,6 +1,8 @@
+import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { LoginServiceService } from 'src/app/services/login-service.service';
+import { catchError } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -8,27 +10,97 @@ import { LoginServiceService } from 'src/app/services/login-service.service';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  userName = new FormControl('');
-  password = new FormControl('');
-  
-  
+
+  loginForm = new FormGroup({
+    email : new FormControl('', [Validators.required, Validators.email]),
+    password : new FormControl('', [Validators.required]) 
+  })
+
+  userLoginStatus = false;
+  showLoader:boolean = false;
+  credentialWrong:boolean = false;
+  messageToShow:string = ''
   
 
-  constructor(public loginService:LoginServiceService) { 
+  constructor(public loginService:LoginServiceService, private route:Router) { 
 
   }
 
   //check the user login status
   ngOnInit() {
-    console.log("login component has been initialized!")
-    console.log("login status is"+this.loginService.isUserLoggedIn)
+    this.detectChanges();
+    this.loginService.isUserLoggedIn.subscribe(data=>{
+      this.userLoginStatus = data;
+      if(this.userLoginStatus){
+        //redirect to home page
+        this.route.navigate(['home']);
+      }
+    })
   }
 
+  detectChanges() {
+    this.loginForm.valueChanges.subscribe(res => {
+      // clear the error if have
+      this.credentialWrong = false;
+      
+    });
+  }
+
+  get email(){
+    return this.loginForm.get('email')
+  }
+  get password(){
+    return this.loginForm.get('password')
+  }
   userLogin(){
-   
-    this.loginService.userName = this.userName.value === null ? "": this.userName.value;
-    this.loginService.password = this.password.value === null ? "": this.password.value;
-    this.loginService.userLogin();
+    console.log(this.loginForm.value);
+    this.showLoader = true;
+
+    this.loginService.userName = this.loginForm.value.email;
+    this.loginService.password = this.loginForm.value.password;
+
+    this.loginService.userLogin().subscribe(
+      (data)=>{
+        console.log(data);
+        this.showLoader = false;
+  
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('refresh_token', data.refresh_token);
+  
+        //redirect user to home page
+        this.loginService.isUserLoggedIn.next(true);
+        this.route.navigate(['home']);
+  
+        console.log('recieved response')
+      },
+      (error)=>{
+        this.showLoader = false;
+        this.credentialWrong = true;
+        if (error.status === 0) {
+          // Handle 404 error
+          this.messageToShow = "Check your internet connection!";
+          // console.log('Check your internet connection');
+        } else {
+          // user credential is wrong
+          this.messageToShow = "Wrong credential!";
+          // console.log('An error occurred:', error);
+
+        }
+      }
+     )
+  }
+
+  changeBoarder(fieldName:string){
+    if(fieldName == 'email'){
+      if(this.email?.invalid && this.email.touched)
+       return {border:'1px solid red'}
+    }
+
+    if(fieldName == 'password'){
+      if(this.password?.invalid && this.password.touched)
+       return {border:'1px solid red'}
+    }
+    return {}
   }
 
 }

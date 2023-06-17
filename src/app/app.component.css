@@ -8,3 +8,7 @@
     font-size: 12px; 
     padding-top: 4px
   }
+
+  .content-area{
+    min-height: 480px;
+  }

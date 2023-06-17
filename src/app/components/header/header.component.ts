@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { LoginServiceService } from '../../services/login-service.service';
 
 @Component({
   selector: 'app-header',
@@ -6,6 +7,7 @@ import { Component } from '@angular/core';
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent {
+  constructor(private loginService:LoginServiceService){}
 
   myFunction() {
     console.log('hello')
@@ -16,6 +18,11 @@ export class HeaderComponent {
       if(x?.className)
         x.className = "topnav";
     }
+  }
+
+  logout(){
+    console.log("logout works")
+    this.loginService.logoutProcess();
   }
 
 }

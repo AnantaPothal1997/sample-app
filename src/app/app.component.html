@@ -1,7 +1,10 @@
 <!-- keep header -->
 <app-header *ngIf="showHeaderFooter"></app-header>
 
-<router-outlet></router-outlet>
+<div class = 'content-area'>
+    <router-outlet></router-outlet>
+</div>
+
 
 <!-- keep footer -->
 <app-footer *ngIf="showHeaderFooter"></app-footer>
