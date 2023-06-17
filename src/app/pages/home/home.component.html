@@ -1,5 +1,17 @@
-<div style="padding-left:16px">
+<div style="padding-left:16px" class="container">
     <h2></h2>
     <p>The below text box is a string concatinator. If the string lenght is exceeds 50 then it will concatinate the string but it will not concat a word from middle.</p>
     
-  </div>
+</div>
+
+<div class="form-group container">
+  <label for="exampleFormControlTextarea1">Enter your text here</label>
+  <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" (keyup)="checkAndAdd()" [formControl] = "textArea"></textarea>
+</div>
+
+
+<div class="container">
+  <!-- <pre>Output: {{finalString}}</pre> -->
+     <b>Output:</b> <pre style="white-space:unset" [innerHTML]="finalString" >
+    </pre>
+</div>
